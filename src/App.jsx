@@ -1,33 +1,78 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [items, setItem] = useState([])
+  const [product, setProduct] = useState('')
+
+  const addProduct = (e) => {
+    e.preventDefault()
+
+    if (product.trim() !== '') {
+      setItem(prev => [...prev, {
+        id: crypto.randomUUID(),
+        productName: product.toLocaleUpperCase().trim(),
+        checked: false
+      }]);
+    }
+
+    setProduct('')
+  }
+
+  const createHandleRemoveItem = (id) => () => {
+    setItem(prevItems => {
+      return prevItems.filter(currentItem => currentItem.id !== id)
+    })
+  }
+
+  const createHandleCheckProduct = (id) => () => {
+    setItem(prevItems =>
+      prevItems.map(currentItem =>
+        currentItem.id === id ? { ...currentItem, checked: !currentItem.checked } : currentItem
+      )
+    )
+  }
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <section className="container">
+        <h2>Lista De Compras</h2>
+        <div className='addProductContainer'>
+          <form>
+            <input type="text" className='addProductInput' placeholder='Escribe un producto.' value={product} onChange={(e) => setProduct(e.target.value)} />
+            <button className='addProductBtn' onClick={addProduct}>Agregar</button>
+          </form>
+        </div>
+
+        <div className='listaContainer'>
+          <ul>
+            {
+              items.length === 0 ? (
+                <p>
+                  <strong>No hay productos en la lista.</strong>
+                </p>
+              ) : (
+                items.map((item) => (
+                  <li key={item.id}>
+                    <span className={item.checked ? 'crossedOut' : ''}>{item.productName}</span>
+                    <div className='accionsContainer'>
+                      {
+                        !item.checked ? (
+                          <button onClick={createHandleRemoveItem(item.id)}>Eliminar</button>
+                        ) : ('')
+                      }
+
+                      <button onClick={createHandleCheckProduct(item.id)}>
+                        {!item.checked ? 'Check' : 'Uncheck'}
+                      </button>
+                    </div>
+                  </li>
+                ))
+              )
+            }
+          </ul>
+        </div>
+      </section>
     </>
   )
 }
